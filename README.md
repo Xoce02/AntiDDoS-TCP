@@ -17,3 +17,17 @@ El programa XDP implementa un filtro de red que examina los paquetes TCP e ICMP 
 - Un sistema Linux con soporte para XDP y eBPF.
 - Clang y LLVM para compilar el programa.
 - Herramientas de red como `ip` y `bpftool` para cargar y verificar el programa XDP.
+
+## Compilación
+
+1. **Instalar Dependencias**:
+
+   Asegúrate de tener Clang y las herramientas necesarias instaladas. Puedes instalar estas herramientas en una distribución basada en Debian/Ubuntu usando:
+
+   ```bash
+   sudo apt-get update
+   sudo apt-get install clang llvm libelf-dev gcc make iproute2
+2. **Compilar el Programa:**
+   Utiliza Clang para compilar el código fuente en bytecode BPF:
+   ```bash
+   clang -O2 -target bpf -c xdp-tcpsyn.c -o xdp-tcpsyn.o
