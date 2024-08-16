@@ -44,7 +44,7 @@ Verifica que el programa se ha cargado correctamente:
    bpftool prog show
    ip link show dev eth0
    ```
-##Desactivar el Programa
+## Desactivar el Programa
 Si necesitas desactivar el programa XDP, usa:
    ```bash
    ip link set dev eth0 xdp off
