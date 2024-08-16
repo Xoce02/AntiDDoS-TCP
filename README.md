@@ -31,3 +31,26 @@ El programa XDP implementa un filtro de red que examina los paquetes TCP e ICMP 
    Utiliza Clang para compilar el código fuente en bytecode BPF:
    ```bash
    clang -O2 -target bpf -c xdp-tcpsyn.c -o xdp-tcpsyn.o
+## Cargar el Programa XDP
+Usa la herramienta ip para cargar el programa en la interfaz de red:
+   ```bash
+   ip link set dev eth0 xdp obj xdp-tcpsyn.o
+   ```
+Reemplaza 'eth0' con el nombre de tu interfaz de red.
+
+## Verificar el Programa
+Verifica que el programa se ha cargado correctamente:
+   ```bash
+   bpftool prog show
+   ip link show dev eth0
+   ```
+##Desactivar el Programa
+Si necesitas desactivar el programa XDP, usa:
+   ```bash
+   ip link set dev eth0 xdp off
+   ```
+
+
+
+
+
