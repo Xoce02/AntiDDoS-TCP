@@ -36,7 +36,7 @@ Usa la herramienta ip para cargar el programa en la interfaz de red:
    ```bash
    ip link set dev eth0 xdp obj xdp-tcpsyn.o
    ```
-Reemplaza 'eth0' con el nombre de tu interfaz de red.
+Reemplaza `eth0` con el nombre de tu interfaz de red.
 
 ## Verificar el Programa
 Verifica que el programa se ha cargado correctamente:
