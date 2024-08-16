@@ -32,7 +32,7 @@ El programa XDP implementa un filtro de red que examina los paquetes TCP e ICMP 
    ```bash
    clang -O2 -target bpf -c xdp-tcpsyn.c -o xdp-tcpsyn.o
 ## Cargar el Programa XDP
-Usa la herramienta ip para cargar el programa en la interfaz de red:
+Usa la herramienta `ip` para cargar el programa en la interfaz de red:
    ```bash
    ip link set dev eth0 xdp obj xdp-tcpsyn.o
    ```
