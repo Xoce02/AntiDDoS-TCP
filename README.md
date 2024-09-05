@@ -15,7 +15,6 @@ Este repositorio contiene un script de filtrado de paquetes basado en **XDP (eXp
    - **RST Protection**: Bloquea paquetes con el flag `RST`, que se utilizan para finalizar conexiones, lo que puede ser explotado en ataques para cortar conexiones legítimas.
    - **Combinaciones de banderas inválidas**: Se bloquean paquetes que tienen combinaciones inválidas de flags, como `SYN + FIN`, `PSH + URG`, y otros.
    - **Protección contra ventanas TCP de tamaño 0**: Paquetes con una ventana de tamaño 0 son bloqueados, ya que pueden ser utilizados para evadir el control de congestión de la red.
-   - **Protección contra IP spoofing**: Bloquea paquetes en los que la IP de origen es igual a la IP de destino, lo cual es un indicativo de ataques de **IP spoofing**.
    - **Fragmentación maliciosa**: Paquetes IP fragmentados de forma inapropiada son detectados y bloqueados.
 
 ### 3. **Filtrado avanzado de paquetes ICMP**
