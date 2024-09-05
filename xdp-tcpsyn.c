@@ -5,6 +5,14 @@
 #include <linux/icmp.h>
 #include <bpf/bpf_helpers.h>
 
+// Mapa BPF para registrar estadísticas de paquetes
+struct bpf_map_def SEC("maps") packet_stats = {
+    .type = BPF_MAP_TYPE_PERCPU_ARRAY,
+    .key_size = sizeof(u32),
+    .value_size = sizeof(u64),
+    .max_entries = 256, 
+};
+
 SEC("xdp_tcp_network_filter")
 int xdp_filter_func(struct xdp_md *ctx) {
     void *data = (void *)(unsigned long)ctx->data;
@@ -33,8 +41,16 @@ int xdp_filter_func(struct xdp_md *ctx) {
 
         struct tcphdr *tcp = data + sizeof(struct ethhdr) + sizeof(struct iphdr);
 
+        // Incrementa el contador de paquetes TCP
+        u32 key = 0;
+        u64 *counter = bpf_map_lookup_elem(&packet_stats, &key);
+        if (counter) {
+            __sync_fetch_and_add(counter, 1);
+        }
+
+        // Filtrado avanzado TCP
         if (tcp->syn && !tcp->ack) {
-            return XDP_DROP;
+            return XDP_DROP;  
         } else if (tcp->fin && !tcp->ack) {
             return XDP_DROP;
         } else if (tcp->rst) {
@@ -47,40 +63,18 @@ int xdp_filter_func(struct xdp_md *ctx) {
             return XDP_DROP;
         } else if (tcp->fin && tcp->psh && tcp->urg) {
             return XDP_DROP;
-        } else if (tcp->doff < 5) {
+        } else if (tcp->doff < 5 || tcp->doff > 15) {
             return XDP_DROP;
         } else if (tcp->ack && !(tcp->syn || tcp->fin || tcp->rst || tcp->psh || tcp->urg)) {
             return XDP_DROP;
         } else if (tcp->syn && tcp->ack) {
-            return XDP_DROP;
-        } else if (tcp->fin && tcp->urg && !tcp->syn && !tcp->ack && !tcp->psh && !tcp->rst) {
-            return XDP_DROP;
-        } else if (tcp->doff > 15) {
-            return XDP_DROP;
-        } else if (tcp->rst && !tcp->syn && !tcp->fin && !tcp->ack && !tcp->psh && !tcp->urg) {
-            return XDP_DROP;
-        } else if (tcp->psh && !tcp->syn && !tcp->ack && !tcp->fin && !tcp->urg) {
             return XDP_DROP;
         } else if (tcp->window == 0) {
-            return XDP_DROP;
+            return XDP_DROP; 
         } else if (ip->saddr == ip->daddr) {
-            return XDP_DROP;
+            return XDP_DROP;  
         } else if (ip->frag_off & htons(IP_MF | IP_OFFSET)) {
-            return XDP_DROP;
-        } else if (tcp->doff > 15) {
-            return XDP_DROP;
-        } else if (tcp->syn && tcp->ack) {
-            return XDP_DROP;
-        } else if (tcp->syn && !tcp->ack) {
-            return XDP_DROP;
-        } else if (tcp->urg && tcp->psh && tcp->fin) {
-            return XDP_DROP;
-        } else if (!(tcp->syn || tcp->fin || tcp->rst || tcp->psh || tcp->ack || tcp->urg)) {
-            return XDP_DROP;
-        } else if (tcp->fin && !(tcp->syn || tcp->ack || tcp->rst || tcp->psh || tcp->urg)) {
-            return XDP_DROP;
-        } else if (tcp->ack && !(tcp->syn || tcp->fin || tcp->rst || tcp->psh || tcp->urg)) {
-            return XDP_DROP;
+            return XDP_DROP;  
         }
     } else if (ip->protocol == IPPROTO_ICMP) {
         if (data + sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(struct icmphdr) > data_end) {
@@ -89,6 +83,7 @@ int xdp_filter_func(struct xdp_md *ctx) {
 
         struct icmphdr *icmp = data + sizeof(struct ethhdr) + sizeof(struct iphdr);
 
+        // Evitar ataques ICMP flood
         if (icmp->type == ICMP_ECHO && icmp->code == 0) {
             return XDP_DROP;
         } else if (icmp->type == ICMP_ECHOREPLY && icmp->code == 0) {
@@ -100,4 +95,3 @@ int xdp_filter_func(struct xdp_md *ctx) {
 }
 
 char _license[] SEC("license") = "GPL";
-
