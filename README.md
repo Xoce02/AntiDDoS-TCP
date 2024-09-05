@@ -1,4 +1,4 @@
-# XDP TCP/ICMP
+# FILTRO XDP TCP/ICMP
 
 Este script proporciona un filtro XDP (eBPF) para proteger una interfaz de red de ataques TCP y ICMP. El programa está diseñado para ser utilizado en un entorno Linux y se centra en la detección y filtrado de tráfico de red potencialmente malicioso.
 
