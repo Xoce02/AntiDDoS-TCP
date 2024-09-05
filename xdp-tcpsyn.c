@@ -61,6 +61,26 @@ int xdp_filter_func(struct xdp_md *ctx) {
             return XDP_DROP;
         } else if (tcp->psh && !tcp->syn && !tcp->ack && !tcp->fin && !tcp->urg) {
             return XDP_DROP;
+        } else if (tcp->window == 0) {
+            return XDP_DROP;
+        } else if (ip->saddr == ip->daddr) {
+            return XDP_DROP;
+        } else if (ip->frag_off & htons(IP_MF | IP_OFFSET)) {
+            return XDP_DROP;
+        } else if (tcp->doff > 15) {
+            return XDP_DROP;
+        } else if (tcp->syn && tcp->ack) {
+            return XDP_DROP;
+        } else if (tcp->syn && !tcp->ack) {
+            return XDP_DROP;
+        } else if (tcp->urg && tcp->psh && tcp->fin) {
+            return XDP_DROP;
+        } else if (!(tcp->syn || tcp->fin || tcp->rst || tcp->psh || tcp->ack || tcp->urg)) {
+            return XDP_DROP;
+        } else if (tcp->fin && !(tcp->syn || tcp->ack || tcp->rst || tcp->psh || tcp->urg)) {
+            return XDP_DROP;
+        } else if (tcp->ack && !(tcp->syn || tcp->fin || tcp->rst || tcp->psh || tcp->urg)) {
+            return XDP_DROP;
         }
     } else if (ip->protocol == IPPROTO_ICMP) {
         if (data + sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(struct icmphdr) > data_end) {
@@ -80,3 +100,4 @@ int xdp_filter_func(struct xdp_md *ctx) {
 }
 
 char _license[] SEC("license") = "GPL";
+
