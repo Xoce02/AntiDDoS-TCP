@@ -83,7 +83,6 @@ int xdp_filter_func(struct xdp_md *ctx) {
 
         struct icmphdr *icmp = data + sizeof(struct ethhdr) + sizeof(struct iphdr);
 
-        // Evitar ataques ICMP flood
         if (icmp->type == ICMP_ECHO && icmp->code == 0) {
             return XDP_DROP;
         } else if (icmp->type == ICMP_ECHOREPLY && icmp->code == 0) {
